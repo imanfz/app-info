@@ -1,0 +1,18 @@
+<resources>
+    <string name="update_app_failed">Update app failed!</string>
+    <string name="immediate_update_title">Tetris - GameBot needs an update</string>
+    <string name="immediate_update_message">To use this app, download the latest version</string>
+    <string name="flexible_update_available">App update is available</string>
+    <string name="update_downloaded">App just downloaded an update</string>
+    <string name="update_cancelled">App update cancelled</string>
+    <string name="downloading">Downloading %s</string>
+    <string name="update">UPDATE</string>
+    <string name="restart">RESTART</string>
+    <string name="try_update">TRY</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="failed">Failed</string>
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+</resources>
