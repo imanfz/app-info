@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.navigation.NavController
 import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.ExpandableSearchView
 import dev.fztech.app.info.ui.component.ExtraSmallSpacer
@@ -40,7 +41,7 @@ import dev.fztech.app.info.utils.Category
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavController) {
     val packageManager = LocalContext.current.packageManager
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(Category.ALL) }
