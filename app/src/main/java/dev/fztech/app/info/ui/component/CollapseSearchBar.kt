@@ -1,7 +1,6 @@
 package dev.fztech.app.info.ui.component
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TextFieldDefaults.indicatorLine
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
@@ -42,6 +40,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -63,7 +62,7 @@ fun ExpandableSearchView(
     hint: String = "",
     backgroundEnabled: Boolean = false,
     expandedInitially: Boolean = false,
-    hintTextColor: Color = MaterialTheme.colorScheme.outlineVariant,
+    hintTextColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     iconTint: Color = MaterialTheme.colorScheme.outline,
     buttonTint: Color = MaterialTheme.colorScheme.onPrimary,
     keyboardType: KeyboardType = KeyboardType.Text
@@ -218,6 +217,7 @@ fun ExpandedSearchView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
+                textFieldValue = TextFieldValue("")
                 onExpandedChanged(false)
                 onSearchDisplayClosed()
             }) {
@@ -233,24 +233,15 @@ fun ExpandedSearchView(
                     .fillMaxWidth()
                     .padding(end = Dimens.Default)
                     .heightIn(min = 32.dp, max = 48.dp)
-                    .indicatorLine(
-                        enabled = true,
-                        isError = false,
-                        interactionSource = interactionSource,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Unspecified,
-                            unfocusedContainerColor = Color.Unspecified,
-                            disabledContainerColor = Color.Unspecified,
-                        )
-                    )
                     .focusRequester(textFieldFocusRequester)
                     .clip(Shapes.small)
-                    .background(
-                        if (backgroundEnabled) MaterialTheme.colorScheme.background
-                        else Color.Transparent
-                    ),
+                ,
                 cursorBrush = SolidColor(
                     if (backgroundEnabled) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onPrimary
+                ),
+                textStyle = TextStyle.Default.copy(color =
+                    if (backgroundEnabled)  MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.onPrimary
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -275,9 +266,7 @@ fun ExpandedSearchView(
                             interactionSource = interactionSource,
                             isError = false,
                             leadingIcon = {
-                                if (backgroundEnabled) {
-                                    SearchIcon(iconTint = iconTint)
-                                }
+                                SearchIcon(iconTint = iconTint)
                             },
                             trailingIcon = {
                                 if (textFieldValue.text.isNotEmpty()) {
@@ -295,9 +284,9 @@ fun ExpandedSearchView(
                                 }
                             },
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Unspecified,
-                                unfocusedContainerColor = Color.Unspecified,
-                                disabledContainerColor = Color.Unspecified,
+                                focusedContainerColor = MaterialTheme.colorScheme.background,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                                disabledContainerColor = MaterialTheme.colorScheme.background,
                             ),
                             contentPadding = PaddingValues(bottom = 3.dp),
                         )
@@ -316,7 +305,7 @@ fun ExpandedSearchView(
                                         textFieldValue = TextFieldValue()
                                         onSearchDisplayChanged("")
                                     }) {
-                                        CloseIcon(iconTint = iconTint)
+                                        CloseIcon(iconTint = buttonTint)
                                     }
                                 }
                             },

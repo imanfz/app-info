@@ -46,7 +46,6 @@ import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 import com.google.android.play.core.ktx.updatePriority
 import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.theme.AppInfoTheme
-import dev.fztech.app.info.ui.theme.Colors
 import dev.fztech.app.info.ui.theme.Dimens
 import kotlinx.coroutines.launch
 
@@ -166,7 +165,7 @@ fun UpdateRequired(
     Column(
         modifier
             .fillMaxSize()
-            .background(Colors.BodyColor)
+            .background(MaterialTheme.colorScheme.primary)
             .testTag("UpdateRequired")
             .padding(contentPadding)
             .padding(horizontal = Dimens.Default, vertical = Dimens.XLarge),
