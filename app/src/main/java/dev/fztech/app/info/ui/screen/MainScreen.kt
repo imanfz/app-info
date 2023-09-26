@@ -1,8 +1,8 @@
 package dev.fztech.app.info.ui.screen
 
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +21,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,23 +33,28 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
-import androidx.navigation.NavController
 import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.ExpandableSearchView
 import dev.fztech.app.info.ui.component.ExtraSmallSpacer
 import dev.fztech.app.info.ui.theme.AppInfoTheme
 import dev.fztech.app.info.ui.theme.Dimens
 import dev.fztech.app.info.utils.Category
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(onNavigateToDetail: (PackageInfo) -> Unit) {
     val packageManager = LocalContext.current.packageManager
-    var query by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(Category.ALL) }
-    val allApps = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
+
+    var query by rememberSaveable { mutableStateOf("") }
+    var selectedCategory by rememberSaveable { mutableStateOf(Category.ALL) }
+
+    var allApps by rememberSaveable {
+        mutableStateOf(listOf<PackageInfo>())
+    }
     val systemApps =  allApps.filter { it.applicationInfo.flags and (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM) > 0 }
     val userApps = allApps.filter { it.applicationInfo.flags and (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM) <= 0 }
+
     val filteredList = when(selectedCategory) {
         Category.SYSTEM -> systemApps
         Category.USER -> userApps
@@ -58,15 +65,14 @@ fun MainScreen(navController: NavController) {
             true
         )
     }
-//            if (data.applicationInfo.flags and (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM) > 0) {
-//                // It is a system app
-//            } else {
-//                // It is installed by the user
-//            }
-    Log.d("MainScreen","${packageManager.getInstalledPackages(PackageManager.GET_META_DATA).size}\n" +
-            "${packageManager.getInstalledPackages(0).size}")
 
     val chipState = rememberLazyListState()
+
+    LaunchedEffect(key1 = "main") {
+        launch {
+            allApps = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -74,11 +80,12 @@ fun MainScreen(navController: NavController) {
             ExpandableSearchView(
                 title = stringResource(id = R.string.app_name),
                 searchDisplay = query,
+                hint = "Search",
                 onSearchDisplayChanged = {
                     query = it
                 },
                 onSearchDisplayClosed = {
-                    query = ""
+
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -122,11 +129,9 @@ fun MainScreen(navController: NavController) {
                     }
                 }
             }
-            if (filteredList.isNotEmpty())
-                ListItem(modifier = Modifier, list = filteredList) {
-
-                }
-            else EmptyScreen()
+            ListItem(modifier = Modifier, list = filteredList) { packageInfo ->
+                onNavigateToDetail(packageInfo)
+            }
         }
     }
 }

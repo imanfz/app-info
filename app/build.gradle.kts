@@ -6,9 +6,9 @@ import java.util.Properties
 plugins {
      alias(libs.plugins.application)
      alias(libs.plugins.kotlin.android)
-//    alias(libs.plugins.google.services)
-//    alias(libs.plugins.firebase.crashlytics)
-//    alias(libs.plugins.firebase.pref)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.firebase.pref)
 }
 
 android {
@@ -50,7 +50,7 @@ android {
             useSupportLibrary = true
         }
         multiDexEnabled = true
-        resValue("string", "app_ad_id", "ca-app-pub-9650203619472107~3423987762")
+        resValue("string", "app_ad_id", "ca-app-pub-9650203619472107~5817335904")
     }
 
     buildTypes {
@@ -79,6 +79,7 @@ android {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
     packaging {
+        dex.useLegacyPackaging = false
         resources.excludes.addAll(
             setOf(
                 "/META-INF/{AL2.0,LGPL2.1,gradle-plugins}",
@@ -111,14 +112,16 @@ android {
             resValue("string", "app_name", "Dev App Info: Package Manager")
             resValue("string", "open_ad_id", "ca-app-pub-3940256099942544/3419835294")
             resValue("string", "banner_ad_id", "ca-app-pub-3940256099942544/6300978111")
+            resValue("string", "native_ad_id", "ca-app-pub-3940256099942544/2247696110")
         }
         create("prod") {
             dimension = "default"
             versionCode = 1
             versionName = "1.0.0"
             resValue("string", "app_name", "App Info: Package Manager")
-            resValue("string", "open_ad_id", "ca-app-pub-9650203619472107/4621519369")
-            resValue("string", "banner_ad_id", "ca-app-pub-9650203619472107/3615312034")
+            resValue("string", "open_ad_id", "ca-app-pub-9650203619472107/6506196074")
+            resValue("string", "banner_ad_id", "ca-app-pub-9650203619472107/8891055952")
+            resValue("string", "native_ad_id", "ca-app-pub-9650203619472107/8362203221")
         }
     }
     applicationVariants.all {
@@ -156,6 +159,7 @@ android {
 dependencies {
 
     implementation(libs.core.ktx)
+    implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
@@ -180,6 +184,4 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.pref)
-
-    implementation(libs.coil.compose)
 }

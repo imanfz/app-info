@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "100554524958",
+    "project_id": "app-info-dd5a3",
+    "storage_bucket": "app-info-dd5a3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:100554524958:android:4b4a9821906b244891a10f",
+        "android_client_info": {
+          "package_name": "dev.fztech.app.info"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-vva29w01ssrdSQtQTijgrhnGyr3UoeQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:100554524958:android:9e71f0c827c4f90e91a10f",
+        "android_client_info": {
+          "package_name": "dev.fztech.app.info.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-vva29w01ssrdSQtQTijgrhnGyr3UoeQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

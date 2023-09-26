@@ -1,6 +1,7 @@
 package dev.fztech.app.info.ui.screen
 
 import android.content.pm.PackageInfo
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,18 +18,25 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import androidx.core.graphics.drawable.toBitmapOrNull
+import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.DefaultSpacer
 import dev.fztech.app.info.ui.theme.AppInfoTheme
 import dev.fztech.app.info.ui.theme.Dimens
+import io.github.imanfz.jetpackcomposedoc.ui.component.SafeClick
+import io.github.imanfz.jetpackcomposedoc.ui.component.get
 
 @Composable
 fun ListItem(
@@ -38,33 +46,47 @@ fun ListItem(
 ) {
     val state = rememberLazyListState()
 
-    LazyColumn(
-        state = state,
-        modifier = modifier.fillMaxSize()
-    ) {
-        items(list) {
-            ItemView(data = it, onItemClick = onItemClick)
-            Divider()
+    if (list.isNotEmpty())
+        LazyColumn(
+            state = state,
+            modifier = modifier.fillMaxSize()
+        ) {
+            items(list) {
+                ItemView(data = it, onItemClick = onItemClick)
+                Divider()
+            }
         }
-    }
+    else EmptyScreen()
 }
 
 @Composable
 fun ItemView(data: PackageInfo, onItemClick: (PackageInfo) -> Unit) {
     val pm = LocalContext.current.packageManager
+    val safeClick = remember { SafeClick.get() }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick(data) }
+            .clickable { safeClick.processEvent { onItemClick(data) } }
             .padding(Dimens.Default, Dimens.Small),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = data.applicationInfo.loadIcon(pm),
-            contentDescription = null,
-            modifier = Modifier.size(Dimens.XXXLarge)
-        )
+        data.applicationInfo.loadIcon(pm).toBitmapOrNull()?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+            contentDescription = "icon",
+            modifier = Modifier
+                .size(Dimens.XXXLarge)
+            )
+        } ?: run {
+            Image(
+                imageVector = ImageVector.vectorResource(id = R.drawable.baseline_broken_image_60),
+            contentDescription = "icon",
+            modifier = Modifier
+                .size(Dimens.XXXLarge)
+            )
+        }
+
         DefaultSpacer()
         Column {
             Text(
@@ -73,10 +95,6 @@ fun ItemView(data: PackageInfo, onItemClick: (PackageInfo) -> Unit) {
                 maxLines = 1
             )
             Text(text = data.applicationInfo.packageName, maxLines = 1)
-//                Text(text = "Version: ${
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) data.longVersionCode
-//                    else data.versionCode
-//                }")
             Text(text = "Version: ${data.versionName}", fontSize = 12.sp, maxLines = 1)
         }
 

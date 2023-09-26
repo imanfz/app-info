@@ -2,6 +2,8 @@ package dev.fztech.app.info.ui.screen
 
 import android.content.pm.PackageInfo
 import android.os.Build
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Divider
@@ -19,53 +23,87 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import androidx.core.graphics.drawable.toBitmapOrNull
+import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.DefaultSpacer
+import dev.fztech.app.info.ui.component.ExtraLargeSpacer
 import dev.fztech.app.info.ui.theme.Dimens
 import dev.fztech.app.info.utils.extenstions.toDate
+import io.github.imanfz.jetpackcomposedoc.ui.component.SafeClick
+import io.github.imanfz.jetpackcomposedoc.ui.component.get
 
 @Composable
-fun DetailScreen(navController: NavController, data: PackageInfo) {
+fun DetailScreen(data: PackageInfo, onBackPressed: () -> Unit) {
     val pm = LocalContext.current.packageManager
+    val scrollState = rememberScrollState()
+    val safeClick = remember { SafeClick.get() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Surface(shadowElevation = Dimens.XSmall) {
-                Row(Modifier.fillMaxWidth()) {
+            Surface(
+                Modifier
+                    .fillMaxWidth(),
+                color = MaterialTheme.colorScheme.primary,
+                shadowElevation = Dimens.XSmall) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     IconButton(onClick = {
-                        navController.popBackStack()
+                        safeClick.processEvent { onBackPressed() }
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.ArrowBack,
                             contentDescription = "close icon",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
-                        Text(
-                            text = data.applicationInfo.loadLabel(pm).toString(),
-                            modifier = Modifier.padding(horizontal = Dimens.Default),
-                            maxLines = 1
-                        )
                     }
+                    Text(
+                        text = "Detail",
+                        modifier = Modifier.padding(horizontal = Dimens.Medium),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
         }
     ) {
-        Column(Modifier.padding(it)) {
+        Log.d("TAG", "DetailScreen: $data")
+        Column(
+            Modifier
+                .padding(it)
+                .verticalScroll(scrollState)
+        ) {
+            ExtraLargeSpacer()
             data.apply {
-                AsyncImage(
-                    model = applicationInfo.loadIcon(pm),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
+                applicationInfo.loadIcon(pm).toBitmapOrNull()?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "icon",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                } ?: run {
+                    Image(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.baseline_broken_image_60),
+                        contentDescription = "icon",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
                 DefaultSpacer()
                 ItemDetail(title = "Label", desc = applicationInfo.loadLabel(pm).toString())
                 ItemDetail(title = "Package Name", desc = packageName)
@@ -75,8 +113,9 @@ fun DetailScreen(navController: NavController, data: PackageInfo) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) longVersionCode
                     else versionCode
                 }")
+                ItemDetail(title = "Status", desc = if (applicationInfo.enabled) "Enable" else "Disable")
                 DoubleItemDetail(
-                    firstTitle = "First Install", firstDesc = firstInstallTime.toDate(),
+                    firstTitle = "First Install Time", firstDesc = firstInstallTime.toDate(),
                     secondTitle = "Last Update", secondDesc = lastUpdateTime.toDate()
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -116,11 +155,17 @@ fun DoubleItemDetail(
     firstTitle: String, firstDesc: String,
     secondTitle: String, secondDesc: String
 ) {
-    Row(horizontalArrangement = Arrangement.SpaceBetween) {
-        Column(Modifier.padding(Dimens.Default, Dimens.Small)) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(Dimens.Default, Dimens.Small),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
             Details(title = firstTitle, desc = firstDesc)
         }
-        Column {
+        Column(horizontalAlignment = Alignment.End) {
             Details(title = secondTitle, desc = secondDesc)
         }
     }

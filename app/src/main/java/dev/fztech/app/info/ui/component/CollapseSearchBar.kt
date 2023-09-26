@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -24,11 +23,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,7 +66,7 @@ fun ExpandableSearchView(
     buttonTint: Color = MaterialTheme.colorScheme.onPrimary,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
-    val (expanded, onExpandedChanged) = remember {
+    val (expanded, onExpandedChanged) = rememberSaveable {
         mutableStateOf(expandedInitially)
     }
 
@@ -168,7 +167,7 @@ fun CollapsedSearchView(
         Text(
             text = title,
             modifier = Modifier
-                .padding(start = 16.dp),
+                .padding(horizontal = Dimens.Default),
             color = buttonTint
         )
         IconButton(onClick = { onExpandedChanged(true) }) {
@@ -206,125 +205,121 @@ fun ExpandedSearchView(
         mutableStateOf(TextFieldValue(searchDisplay, TextRange(searchDisplay.length)))
     }
 
-    CompositionLocalProvider(
-        LocalTextSelectionColors provides LocalTextSelectionColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(2.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {
-                textFieldValue = TextFieldValue("")
-                onExpandedChanged(false)
-                onSearchDisplayClosed()
-            }) {
-                BackIcon(iconTint = buttonTint)
-            }
-            BasicTextField(
-                value = textFieldValue,
-                onValueChange = {
-                    textFieldValue = it
-                    onSearchDisplayChanged(it.text)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = Dimens.Default)
-                    .heightIn(min = 32.dp, max = 48.dp)
-                    .focusRequester(textFieldFocusRequester)
-                    .clip(Shapes.small)
-                ,
-                cursorBrush = SolidColor(
-                    if (backgroundEnabled) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onPrimary
-                ),
-                textStyle = TextStyle.Default.copy(color =
-                    if (backgroundEnabled)  MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.onPrimary
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = keyboardType,
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        focusManager.clearFocus()
-                    }
-                ),
-                singleLine = true,
-                decorationBox = { innerTextField ->
-                    // places text field with placeholder and appropriate bottom padding
-                    if (backgroundEnabled) {
-                        TextFieldDefaults.DecorationBox(
-                            value = searchDisplay,
-                            innerTextField = innerTextField,
-                            enabled = true,
-                            singleLine = true,
-                            visualTransformation = VisualTransformation.None,
-                            interactionSource = interactionSource,
-                            isError = false,
-                            leadingIcon = {
-                                SearchIcon(iconTint = iconTint)
-                            },
-                            trailingIcon = {
-                                if (textFieldValue.text.isNotEmpty()) {
-                                    IconButton(onClick = {
-                                        textFieldValue = TextFieldValue()
-                                        onSearchDisplayChanged("")
-                                    }) {
-                                        CloseIcon(iconTint = iconTint)
-                                    }
-                                }
-                            },
-                            placeholder = {
-                                if (textFieldValue.text.isEmpty()) {
-                                    Text(text = hint, color = hintTextColor)
-                                }
-                            },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.background,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                                disabledContainerColor = MaterialTheme.colorScheme.background,
-                            ),
-                            contentPadding = PaddingValues(bottom = 3.dp),
-                        )
-                    } else {
-                        TextFieldDefaults.DecorationBox(
-                            value = searchDisplay,
-                            innerTextField = innerTextField,
-                            enabled = true,
-                            singleLine = true,
-                            visualTransformation = VisualTransformation.None,
-                            interactionSource = interactionSource,
-                            isError = false,
-                            trailingIcon = {
-                                if (textFieldValue.text.isNotEmpty()) {
-                                    IconButton(onClick = {
-                                        textFieldValue = TextFieldValue()
-                                        onSearchDisplayChanged("")
-                                    }) {
-                                        CloseIcon(iconTint = buttonTint)
-                                    }
-                                }
-                            },
-                            placeholder = {
-                                if (textFieldValue.text.isEmpty()) {
-                                    Text(text = hint, color = hintTextColor)
-                                }
-                            },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Unspecified,
-                                unfocusedContainerColor = Color.Unspecified,
-                                disabledContainerColor = Color.Unspecified,
-                            ),
-                            contentPadding = PaddingValues(bottom = 3.dp),
-                        )
-                    }
-                }
-            )
+        IconButton(onClick = {
+            textFieldValue = TextFieldValue("")
+            onExpandedChanged(false)
+            onSearchDisplayClosed()
+        }) {
+            BackIcon(iconTint = buttonTint)
         }
+        BasicTextField(
+            value = textFieldValue,
+            onValueChange = {
+                textFieldValue = it
+                onSearchDisplayChanged(it.text)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = Dimens.Default)
+                .heightIn(min = 32.dp, max = 48.dp)
+                .focusRequester(textFieldFocusRequester)
+                .clip(Shapes.small)
+            ,
+            cursorBrush = SolidColor(
+                if (backgroundEnabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onPrimary
+            ),
+            textStyle = TextStyle.Default.copy(color =
+            if (backgroundEnabled)  MaterialTheme.colorScheme.onSurface
+            else MaterialTheme.colorScheme.onPrimary
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    focusManager.clearFocus()
+                }
+            ),
+            singleLine = true,
+            decorationBox = { innerTextField ->
+                // places text field with placeholder and appropriate bottom padding
+                if (backgroundEnabled) {
+                    TextFieldDefaults.DecorationBox(
+                        value = searchDisplay,
+                        innerTextField = innerTextField,
+                        enabled = true,
+                        singleLine = true,
+                        visualTransformation = VisualTransformation.None,
+                        interactionSource = interactionSource,
+                        isError = false,
+                        leadingIcon = {
+                            SearchIcon(iconTint = iconTint)
+                        },
+                        trailingIcon = {
+                            if (textFieldValue.text.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    textFieldValue = TextFieldValue()
+                                    onSearchDisplayChanged("")
+                                }) {
+                                    CloseIcon(iconTint = iconTint)
+                                }
+                            }
+                        },
+                        placeholder = {
+                            if (textFieldValue.text.isEmpty()) {
+                                Text(text = hint, color = hintTextColor)
+                            }
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.background,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                            disabledContainerColor = MaterialTheme.colorScheme.background,
+                        ),
+                        contentPadding = PaddingValues(bottom = 3.dp),
+                    )
+                } else {
+                    TextFieldDefaults.DecorationBox(
+                        value = searchDisplay,
+                        innerTextField = innerTextField,
+                        enabled = true,
+                        singleLine = true,
+                        visualTransformation = VisualTransformation.None,
+                        interactionSource = interactionSource,
+                        isError = false,
+                        trailingIcon = {
+                            if (textFieldValue.text.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    textFieldValue = TextFieldValue()
+                                    onSearchDisplayChanged("")
+                                }) {
+                                    CloseIcon(iconTint = buttonTint)
+                                }
+                            }
+                        },
+                        placeholder = {
+                            if (textFieldValue.text.isEmpty()) {
+                                Text(text = hint, color = buttonTint)
+                            }
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Unspecified,
+                            unfocusedContainerColor = Color.Unspecified,
+                            disabledContainerColor = Color.Unspecified,
+                        ),
+                        contentPadding = PaddingValues(bottom = 3.dp),
+                    )
+                }
+            }
+        )
     }
 }
 

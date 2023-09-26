@@ -6,5 +6,10 @@ import dev.fztech.app.info.utils.helper.FirebaseManager
 import dev.fztech.app.info.utils.helper.OpenAppAdManager
 
 class App: Application() {
-
+    override fun onCreate() {
+        super.onCreate()
+        ConsentInfoManager(this)
+        OpenAppAdManager(this)
+        FirebaseManager(this)
+    }
 }
