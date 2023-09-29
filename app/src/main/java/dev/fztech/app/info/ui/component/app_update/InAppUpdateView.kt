@@ -125,11 +125,11 @@ fun InAppUpdateView(content: @Composable () -> Unit) {
             is AppUpdateResult.InProgress -> {
                 val progress = (appUpdateResult.installState.bytesDownloaded() * 100 / appUpdateResult.installState.totalBytesToDownload()).toInt()
                 Log.d(TAG, "InAppUpdateView: progress $progress")
-                scope.launch {
-                    snackBarHostState.showSnackbar(
-                        message = context.getString(R.string.downloading, "$progress%")
-                    )
-                }
+//                scope.launch {
+//                    snackBarHostState.showSnackbar(
+//                        message = context.getString(R.string.downloading, "$progress%")
+//                    )
+//                }
             }
             is AppUpdateResult.Downloaded -> scope.launch {
                 snackBarHostState.showSnackbar(

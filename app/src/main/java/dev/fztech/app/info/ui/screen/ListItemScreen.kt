@@ -18,25 +18,31 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmapOrNull
+import coil.compose.AsyncImage
 import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.DefaultSpacer
 import dev.fztech.app.info.ui.theme.AppInfoTheme
 import dev.fztech.app.info.ui.theme.Dimens
+import dev.fztech.app.info.utils.extenstions.logd
 import io.github.imanfz.jetpackcomposedoc.ui.component.SafeClick
 import io.github.imanfz.jetpackcomposedoc.ui.component.get
+import kotlinx.coroutines.launch
 
 @Composable
 fun ListItem(
@@ -45,6 +51,12 @@ fun ListItem(
     onItemClick: (PackageInfo) -> Unit
 ) {
     val state = rememberLazyListState()
+
+    LaunchedEffect(state) {
+        if (state.isScrollInProgress) {
+            logd("scroll")
+        }
+    }
 
     if (list.isNotEmpty())
         LazyColumn(
@@ -71,22 +83,13 @@ fun ItemView(data: PackageInfo, onItemClick: (PackageInfo) -> Unit) {
             .padding(Dimens.Default, Dimens.Small),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        data.applicationInfo.loadIcon(pm).toBitmapOrNull()?.let {
-            Image(
-                bitmap = it.asImageBitmap(),
+        AsyncImage(
+            model = data.applicationInfo.loadIcon(pm),
             contentDescription = "icon",
             modifier = Modifier
-                .size(Dimens.XXXLarge)
-            )
-        } ?: run {
-            Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.baseline_broken_image_60),
-            contentDescription = "icon",
-            modifier = Modifier
-                .size(Dimens.XXXLarge)
-            )
-        }
-
+                .size(Dimens.XXLarge),
+            contentScale = ContentScale.FillBounds
+        )
         DefaultSpacer()
         Column {
             Text(

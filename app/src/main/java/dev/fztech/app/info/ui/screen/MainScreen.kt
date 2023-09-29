@@ -1,8 +1,7 @@
 package dev.fztech.app.info.ui.screen
 
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,9 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +32,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.fztech.app.info.R
+import dev.fztech.app.info.ui.component.BannerAdView
 import dev.fztech.app.info.ui.component.ExpandableSearchView
 import dev.fztech.app.info.ui.component.ExtraSmallSpacer
 import dev.fztech.app.info.ui.theme.AppInfoTheme
@@ -44,33 +47,18 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(onNavigateToDetail: (PackageInfo) -> Unit) {
-    val packageManager = LocalContext.current.packageManager
 
-    var query by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf(Category.ALL) }
-
-    var allApps by rememberSaveable {
-        mutableStateOf(listOf<PackageInfo>())
-    }
-    val systemApps =  allApps.filter { it.applicationInfo.flags and (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM) > 0 }
-    val userApps = allApps.filter { it.applicationInfo.flags and (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP or ApplicationInfo.FLAG_SYSTEM) <= 0 }
-
-    val filteredList = when(selectedCategory) {
-        Category.SYSTEM -> systemApps
-        Category.USER -> userApps
-        else -> allApps
-    }.filter {
-        it.applicationInfo.loadLabel(packageManager).toString().contains(
-            query,
-            true
-        )
-    }
-
+    val context = LocalContext.current
+    val viewModel = viewModel<AppInfoViewModel>()
     val chipState = rememberLazyListState()
+    val list by viewModel.items.observeAsState(emptyList())
+    val query by viewModel.query.observeAsState(initial = "")
 
-    LaunchedEffect(key1 = "main") {
+    LaunchedEffect(viewModel) {
         launch {
-            allApps = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
+            viewModel.apply {
+                loadPackage(context)
+            }
         }
     }
 
@@ -79,23 +67,36 @@ fun MainScreen(onNavigateToDetail: (PackageInfo) -> Unit) {
         topBar = {
             ExpandableSearchView(
                 title = stringResource(id = R.string.app_name),
-                searchDisplay = query,
+                query = query,
                 hint = "Search",
-                onSearchDisplayChanged = {
-                    query = it
+                onQueryChanged = {
+                    viewModel.setQuery(it)
+                    Log.d("TAG", "MainScreen: onSearchDisplayChanged ${viewModel.query.value}")
+                },
+                onSearchQuery = {
+                    viewModel.setQuery(it)
                 },
                 onSearchDisplayClosed = {
-
+                    viewModel.setQuery("")
+                    Log.d("TAG", "MainScreen: onSearchDisplayClosed ${viewModel.query.value}")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.primary),
                 backgroundEnabled = false
             )
-        },
+        }
     ) {
-        Column(Modifier.padding(it))  {
-            Surface(shadowElevation = Dimens.XSmall) {
+        ConstraintLayout(Modifier.fillMaxSize().padding(it))  {
+            val (chip, content, ads) = createRefs()
+
+            Surface(
+                modifier = Modifier.constrainAs(chip) {
+                    top.linkTo(parent.top)
+                    width = Dimension.matchParent
+                },
+                shadowElevation = Dimens.XSmall
+            ) {
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -105,22 +106,16 @@ fun MainScreen(onNavigateToDetail: (PackageInfo) -> Unit) {
                     items(Category.values()) { item ->
                         FilterChip(
                             modifier = Modifier.padding(horizontal = Dimens.Small), // gap between items
-                            selected = (item == selectedCategory),
+                            selected = (item == viewModel.category.value),
                             onClick = {
-                                selectedCategory = item
+                                viewModel.changeCategory(item)
                             },
                             label = {
                                 Row {
                                     Text(text = item.value)
                                     ExtraSmallSpacer()
                                     Text(
-                                        text = "(${
-                                            when (item) {
-                                                Category.SYSTEM -> systemApps
-                                                Category.USER -> userApps
-                                                else -> allApps
-                                            }.size
-                                        })",
+                                        text = "(${viewModel.getSize(item)})",
                                         color = MaterialTheme.colorScheme.surfaceTint
                                     )
                                 }
@@ -129,9 +124,16 @@ fun MainScreen(onNavigateToDetail: (PackageInfo) -> Unit) {
                     }
                 }
             }
-            ListItem(modifier = Modifier, list = filteredList) { packageInfo ->
+            ListItem(modifier = Modifier.constrainAs(content) {
+                top.linkTo(chip.bottom)
+                bottom.linkTo(ads.top, Dimens.Small)
+                height = Dimension.fillToConstraints
+            }, list = list) { packageInfo ->
                 onNavigateToDetail(packageInfo)
             }
+            BannerAdView(Modifier.constrainAs(ads) {
+                bottom.linkTo(parent.bottom)
+            })
         }
     }
 }
@@ -149,8 +151,11 @@ fun MainScreenPreview(@PreviewParameter(LoremIpsum::class) text: String) {
             topBar = {
                 ExpandableSearchView(
                     title = stringResource(id = R.string.app_name),
-                    searchDisplay = query,
-                    onSearchDisplayChanged = {
+                    query = query,
+                    onQueryChanged = {
+                        query = it
+                    },
+                    onSearchQuery = {
                         query = it
                     },
                     onSearchDisplayClosed = {

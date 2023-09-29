@@ -160,9 +160,21 @@ dependencies {
 
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)
-    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.runtime.livedata)
+//    implementation(libs.lifecycle.runtime.compose)
+    // ViewModel
+//    implementation(libs.lifecycle.viewmodel.ktx)
+    // ViewModel utilities for Compose
+//    implementation(libs.lifecycle.viewmodel.compose)
+    // Saved state module for ViewModel
+//    implementation(libs.lifecycle.viewmodel.savedstate)
+    // Lifecycles only (without ViewModel or LiveData)
+//    implementation(libs.lifecycle.runtime.ktx)
+    // LiveData
+//    implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
+    implementation(libs.constraintlayout.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.graphics)
@@ -184,4 +196,6 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.pref)
+
+    implementation(libs.coil.compose)
 }

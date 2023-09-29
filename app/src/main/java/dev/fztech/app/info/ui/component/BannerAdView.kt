@@ -1,4 +1,4 @@
-package dev.fztech.app.info.ui.component.widget
+package dev.fztech.app.info.ui.component
 
 import android.util.Log
 import androidx.compose.foundation.background

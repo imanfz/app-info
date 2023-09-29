@@ -1,11 +1,13 @@
 package dev.fztech.app.info.ui.component
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
@@ -18,17 +20,17 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,8 +56,9 @@ import dev.fztech.app.info.ui.theme.Shapes
 @Composable
 fun ExpandableSearchView(
     modifier: Modifier = Modifier,
-    searchDisplay: String,
-    onSearchDisplayChanged: (String) -> Unit,
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    onSearchQuery: (String) -> Unit,
     onSearchDisplayClosed: () -> Unit,
     title: String = "",
     hint: String = "",
@@ -74,8 +77,9 @@ fun ExpandableSearchView(
         Crossfade(targetState = expanded, label = "SearchBar") { isSearchFieldVisible ->
             when (isSearchFieldVisible) {
                 true -> ExpandedSearchView(
-                    searchDisplay = searchDisplay,
-                    onSearchDisplayChanged = onSearchDisplayChanged,
+                    query = query,
+                    onQueryChanged = onQueryChanged,
+                    onSearchQuery = onSearchQuery,
                     onSearchDisplayClosed = onSearchDisplayClosed,
                     onExpandedChanged = onExpandedChanged,
                     modifier = modifier,
@@ -98,8 +102,9 @@ fun ExpandableSearchView(
     } else {
         when (expanded) {
             true -> ExpandedSearchView(
-                searchDisplay = searchDisplay,
-                onSearchDisplayChanged = onSearchDisplayChanged,
+                query = query,
+                onQueryChanged = onQueryChanged,
+                onSearchQuery = onSearchQuery,
                 onSearchDisplayClosed = onSearchDisplayClosed,
                 onExpandedChanged = onExpandedChanged,
                 modifier = modifier,
@@ -123,28 +128,31 @@ fun ExpandableSearchView(
 }
 
 @Composable
-fun SearchIcon(iconTint: Color) {
+fun SearchIcon(iconTint: Color, onClick: () -> Unit) {
     Icon(
         imageVector = Icons.Default.Search,
         contentDescription = "search icon",
+        modifier = Modifier.clickable { onClick() },
         tint = iconTint
     )
 }
 
 @Composable
-fun CloseIcon(iconTint: Color) {
+fun ClearIcon(iconTint: Color, onClick: () -> Unit) {
     Icon(
         imageVector = Icons.Default.Close,
-        contentDescription = "close icon",
+        contentDescription = "clear",
+        modifier = Modifier.clickable { onClick() },
         tint = iconTint
     )
 }
 
 @Composable
-fun BackIcon(iconTint: Color) {
+fun BackIcon(iconTint: Color, onClick: () -> Unit) {
     Icon(
         imageVector = Icons.Rounded.ArrowBack,
-        contentDescription = "close icon",
+        contentDescription = "back",
+        modifier = Modifier.clickable { onClick() },
         tint = iconTint
     )
 }
@@ -160,18 +168,19 @@ fun CollapsedSearchView(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
+            .padding(horizontal = Dimens.Medium, vertical = 2.dp)
+            .height(56.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
             modifier = Modifier
-                .padding(horizontal = Dimens.Default),
+                .padding(end = Dimens.Default),
             color = buttonTint
         )
-        IconButton(onClick = { onExpandedChanged(true) }) {
-            SearchIcon(iconTint = buttonTint)
+        SearchIcon(iconTint = buttonTint) {
+            onExpandedChanged(true)
         }
     }
 }
@@ -179,8 +188,9 @@ fun CollapsedSearchView(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpandedSearchView(
-    searchDisplay: String,
-    onSearchDisplayChanged: (String) -> Unit,
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    onSearchQuery: (String) -> Unit,
     onSearchDisplayClosed: () -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -189,93 +199,82 @@ fun ExpandedSearchView(
     hintTextColor: Color,
     iconTint: Color,
     buttonTint: Color,
-    keyboardType: KeyboardType
+    keyboardType: KeyboardType,
+    interactionSource: MutableInteractionSource =  remember { MutableInteractionSource() }
 ) {
     val focusManager = LocalFocusManager.current
-
-    val interactionSource = remember { MutableInteractionSource() }
-
-    val textFieldFocusRequester = remember { FocusRequester() }
+    val focusRequester = remember { FocusRequester() }
 
     SideEffect {
-        textFieldFocusRequester.requestFocus()
-    }
-
-    var textFieldValue by remember {
-        mutableStateOf(TextFieldValue(searchDisplay, TextRange(searchDisplay.length)))
+        focusRequester.requestFocus()
     }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(2.dp),
+            .padding(horizontal = Dimens.Medium, vertical = 2.dp)
+            .height(56.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            textFieldValue = TextFieldValue("")
+        BackIcon(iconTint = buttonTint) {
             onExpandedChanged(false)
             onSearchDisplayClosed()
-        }) {
-            BackIcon(iconTint = buttonTint)
         }
+        MediumSpacer()
         BasicTextField(
-            value = textFieldValue,
-            onValueChange = {
-                textFieldValue = it
-                onSearchDisplayChanged(it.text)
-            },
+            value = query,
+            onValueChange = onQueryChanged,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = Dimens.Default)
-                .heightIn(min = 32.dp, max = 48.dp)
-                .focusRequester(textFieldFocusRequester)
-                .clip(Shapes.small)
+                .height(42.dp)
+                .focusRequester(focusRequester)
+                .clip(MaterialTheme.shapes.small)
             ,
             cursorBrush = SolidColor(
                 if (backgroundEnabled) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onPrimary
             ),
-            textStyle = TextStyle.Default.copy(color =
+            textStyle = LocalTextStyle.current.merge(TextStyle(color =
             if (backgroundEnabled)  MaterialTheme.colorScheme.onSurface
             else MaterialTheme.colorScheme.onPrimary
-            ),
+            )),
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
                 imeAction = ImeAction.Search
             ),
             keyboardActions = KeyboardActions(
                 onSearch = {
+                    onSearchQuery(query)
                     focusManager.clearFocus()
                 }
             ),
             singleLine = true,
+            interactionSource = interactionSource,
             decorationBox = { innerTextField ->
                 // places text field with placeholder and appropriate bottom padding
                 if (backgroundEnabled) {
                     TextFieldDefaults.DecorationBox(
-                        value = searchDisplay,
+                        value = query,
                         innerTextField = innerTextField,
                         enabled = true,
                         singleLine = true,
                         visualTransformation = VisualTransformation.None,
                         interactionSource = interactionSource,
-                        isError = false,
                         leadingIcon = {
-                            SearchIcon(iconTint = iconTint)
+                            SearchIcon(iconTint = iconTint) {
+                                
+                            }
                         },
                         trailingIcon = {
-                            if (textFieldValue.text.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    textFieldValue = TextFieldValue()
-                                    onSearchDisplayChanged("")
-                                }) {
-                                    CloseIcon(iconTint = iconTint)
+                            if (query.isNotEmpty()) {
+                                ClearIcon(iconTint = iconTint) {
+                                    onQueryChanged("")
                                 }
                             }
                         },
                         placeholder = {
-                            if (textFieldValue.text.isEmpty()) {
+                            if (query.isEmpty()) {
                                 Text(text = hint, color = hintTextColor)
                             }
                         },
@@ -288,25 +287,21 @@ fun ExpandedSearchView(
                     )
                 } else {
                     TextFieldDefaults.DecorationBox(
-                        value = searchDisplay,
+                        value = query,
                         innerTextField = innerTextField,
                         enabled = true,
                         singleLine = true,
                         visualTransformation = VisualTransformation.None,
                         interactionSource = interactionSource,
-                        isError = false,
                         trailingIcon = {
-                            if (textFieldValue.text.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    textFieldValue = TextFieldValue()
-                                    onSearchDisplayChanged("")
-                                }) {
-                                    CloseIcon(iconTint = buttonTint)
+                            if (query.isNotEmpty()) {
+                                ClearIcon(iconTint = buttonTint) {
+                                    onQueryChanged("")
                                 }
                             }
                         },
                         placeholder = {
-                            if (textFieldValue.text.isEmpty()) {
+                            if (query.isEmpty()) {
                                 Text(text = hint, color = buttonTint)
                             }
                         },
@@ -332,8 +327,9 @@ fun CollapsedSearchViewPreview() {
         ) {
             ExpandableSearchView(
                 title = stringResource(id = R.string.app_name),
-                searchDisplay = "",
-                onSearchDisplayChanged = {},
+                query = "",
+                onQueryChanged = {},
+                onSearchQuery = {},
                 onSearchDisplayClosed = {}
             )
         }
@@ -348,8 +344,9 @@ fun ExpandedSearchViewPreview() {
             color = MaterialTheme.colorScheme.primary
         ) {
             ExpandableSearchView(
-                searchDisplay = "",
-                onSearchDisplayChanged = {},
+                query = "",
+                onQueryChanged = {},
+                onSearchQuery = {},
                 expandedInitially = true,
                 onSearchDisplayClosed = {},
                 hint = "Search"
@@ -367,8 +364,9 @@ fun ExpandedWithBGPreview() {
             color = MaterialTheme.colorScheme.primary
         ) {
             ExpandableSearchView(
-                searchDisplay = "",
-                onSearchDisplayChanged = {},
+                query = "",
+                onQueryChanged = {},
+                onSearchQuery = {},
                 expandedInitially = true,
                 onSearchDisplayClosed = {},
                 backgroundEnabled = true,

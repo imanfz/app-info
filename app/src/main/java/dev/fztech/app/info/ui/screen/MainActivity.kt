@@ -27,41 +27,40 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         setContent {
             val navController = rememberNavController()
 
             AppInfoTheme {
                 InAppUpdateView {
-                    NavHost(navController = navController, startDestination = Routes.Home.route ) {
-                        composable(
-                            Routes.Home.route,
-                            enterTransition = {
-                                slideIntoContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
-                                    animationSpec = tween(700)
-                                )
-                            },
-                            exitTransition = {
-                                slideOutOfContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
-                                    animationSpec = tween(700)
-                                )
-                            },
-                            popEnterTransition = {
-                                slideIntoContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
-                                    animationSpec = tween(700)
-                                )
-                            },
-                            popExitTransition = {
-                                slideOutOfContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
-                                    animationSpec = tween(700)
-                                )
-                            }
-                        ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = Routes.Home.route,
+                        enterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                                animationSpec = tween(700)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                                animationSpec = tween(700)
+                            )
+                        },
+                        popEnterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                                animationSpec = tween(700)
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                                animationSpec = tween(700)
+                            )
+                        }
+                    ) {
+                        composable(Routes.Home.route) {
                             MainScreen {
                                 navController.navigate(
                                     Routes.Detail.route,
@@ -69,33 +68,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        composable(
-                            Routes.Detail.route,
-                            enterTransition = {
-                                slideIntoContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
-                                    animationSpec = tween(700)
-                                )
-                            },
-                            exitTransition = {
-                                slideOutOfContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
-                                    animationSpec = tween(700)
-                                )
-                            },
-                            popEnterTransition = {
-                                slideIntoContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
-                                    animationSpec = tween(700)
-                                )
-                            },
-                            popExitTransition = {
-                                slideOutOfContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
-                                    animationSpec = tween(700)
-                                )
-                            }
-                        ) {
+                        composable(Routes.Detail.route) {
                             @Suppress("DEPRECATION")
                             it.arguments?.apply {
                                 val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -121,7 +94,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
-@Preview(showSystemUi = true)
+@Preview(device = "id:pixel_7", showSystemUi = true)
 @Composable
 fun AppPreview(@PreviewParameter(LoremIpsum::class) text: String) {
     AppInfoTheme {
