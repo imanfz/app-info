@@ -87,7 +87,7 @@ class AppInfoViewModel: ViewModel() {
             try {
                 val results = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
                 _items.value = results
-                _filteredItem.value = _items.value
+                applyFilter()
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(context, "Failed to load package: ${e.message}", Toast.LENGTH_SHORT)

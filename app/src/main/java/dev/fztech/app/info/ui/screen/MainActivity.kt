@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+            val viewModel = viewModel<AppInfoViewModel>()
 
             AppInfoTheme {
                 InAppUpdateView {
@@ -61,7 +63,7 @@ class MainActivity : ComponentActivity() {
                         }
                     ) {
                         composable(Routes.Home.route) {
-                            MainScreen {
+                            MainScreen(viewModel) {
                                 navController.navigate(
                                     Routes.Detail.route,
                                     bundleOf( INFO_KEY to it)

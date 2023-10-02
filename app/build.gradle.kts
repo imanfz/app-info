@@ -109,30 +109,28 @@ android {
             versionCode = 1
             versionName = "1.0.0"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Dev App Info: Package Manager")
+            resValue("string", "app_name", "Dev App Info: Inspector")
             resValue("string", "open_ad_id", "ca-app-pub-3940256099942544/3419835294")
             resValue("string", "banner_ad_id", "ca-app-pub-3940256099942544/6300978111")
-            resValue("string", "native_ad_id", "ca-app-pub-3940256099942544/2247696110")
         }
         create("prod") {
             dimension = "default"
             versionCode = 1
             versionName = "1.0.0"
-            resValue("string", "app_name", "App Info: Package Manager")
+            resValue("string", "app_name", "App Info: Inspector")
             resValue("string", "open_ad_id", "ca-app-pub-9650203619472107/6506196074")
             resValue("string", "banner_ad_id", "ca-app-pub-9650203619472107/8891055952")
-            resValue("string", "native_ad_id", "ca-app-pub-9650203619472107/8362203221")
         }
     }
     applicationVariants.all {
         outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                val outputFileName = "App Info-${versionName}($versionCode)-${buildType.name}.apk"
+                val outputFileName = "App Info_Inspector-${versionName}($versionCode)-${buildType.name}.apk"
                 output.outputFileName = outputFileName
             }
         outputs.all {
             // AAB file name that You want. Flavour name also can be accessed here.
-            val aabPackageName = "App Info-${versionName}($versionCode)-${buildType.name}.aab"
+            val aabPackageName = "App Info_Inspector-${versionName}($versionCode)-${buildType.name}.aab"
             // Get final bundle task name for this variant
             val bundleFinalizeTaskName = StringBuilder("sign").run {
                 // Add each flavor dimension for this variant here
@@ -174,7 +172,7 @@ dependencies {
 //    implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
-    implementation(libs.constraintlayout.compose)
+//    implementation(libs.constraintlayout.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.graphics)

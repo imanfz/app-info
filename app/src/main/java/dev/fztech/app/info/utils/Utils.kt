@@ -48,3 +48,4 @@ fun isSmallScreen(): Boolean {
 
     return widthDp < 600f && heightDp < 891f
 }
+
