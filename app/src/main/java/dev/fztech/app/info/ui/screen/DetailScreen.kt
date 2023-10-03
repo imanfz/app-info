@@ -140,6 +140,8 @@ fun DetailScreen(data: PackageInfo, onBackPressed: () -> Unit) {
                             }
                         )
 
+                        Divider()
+
                         DropdownMenuItem(
                             text = {
                                 Text(text = "Extract Apk")

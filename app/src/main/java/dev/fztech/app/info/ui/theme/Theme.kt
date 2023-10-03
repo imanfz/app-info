@@ -17,12 +17,13 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Blue40,
+    primary = LightBlue,
     onPrimary = Color.White,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Blue40,
+    primary = DarkBlue,
+    onPrimary = Color.White,
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -56,8 +57,8 @@ fun AppInfoTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true //!darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = true //!darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
         }
     }
 
