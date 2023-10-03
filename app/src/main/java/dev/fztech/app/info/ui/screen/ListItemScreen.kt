@@ -1,7 +1,6 @@
 package dev.fztech.app.info.ui.screen
 
 import android.content.pm.PackageInfo
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,27 +21,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.drawable.toBitmapOrNull
 import coil.compose.AsyncImage
-import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.DefaultSpacer
 import dev.fztech.app.info.ui.theme.AppInfoTheme
 import dev.fztech.app.info.ui.theme.Dimens
 import dev.fztech.app.info.utils.extenstions.logd
 import io.github.imanfz.jetpackcomposedoc.ui.component.SafeClick
 import io.github.imanfz.jetpackcomposedoc.ui.component.get
-import kotlinx.coroutines.launch
 
 @Composable
 fun ListItem(
@@ -98,7 +90,7 @@ fun ItemView(data: PackageInfo, onItemClick: (PackageInfo) -> Unit) {
                 maxLines = 1
             )
             Text(text = data.applicationInfo.packageName, maxLines = 1)
-            Text(text = "Version: ${data.versionName}", fontSize = 12.sp, maxLines = 1)
+            Text(text = "Version: ${data.versionName ?: "-"}", fontSize = 12.sp, maxLines = 1)
         }
 
     }

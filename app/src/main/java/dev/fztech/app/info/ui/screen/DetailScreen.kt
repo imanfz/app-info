@@ -213,11 +213,11 @@ fun DetailScreen(data: PackageInfo, onBackPressed: () -> Unit) {
 //                    Text(text = "${}")
                     DefaultSpacer()
                     ItemDetail(title = "Label", desc = applicationInfo.loadLabel(pm).toString())
-                    ItemDetail(title = "Package Name", desc = packageName)
+                    ItemDetail(title = "Package Name", desc = packageName ?: "")
                     @Suppress("DEPRECATION")
                     DoubleItemDetail(
                         firstTitle = "Version Name",
-                        firstDesc = versionName,
+                        firstDesc = versionName ?: "",
                         secondTitle = "Version Code",
                         secondDesc = "${
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) longVersionCode.toInt()

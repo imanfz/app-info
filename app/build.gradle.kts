@@ -115,7 +115,7 @@ android {
         }
         create("prod") {
             dimension = "default"
-            versionCode = 3
+            versionCode = 4
             versionName = "1.0.0"
             resValue("string", "app_name", "App Info: Inspector")
             resValue("string", "open_ad_id", "ca-app-pub-9650203619472107/6506196074")
