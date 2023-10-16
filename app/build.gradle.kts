@@ -112,25 +112,27 @@ android {
             resValue("string", "app_name", "Dev App Info: Inspector")
             resValue("string", "open_ad_id", "ca-app-pub-3940256099942544/3419835294")
             resValue("string", "banner_ad_id", "ca-app-pub-3940256099942544/6300978111")
+            resValue("string", "banner2_ad_id", "ca-app-pub-3940256099942544/6300978111")
         }
         create("prod") {
             dimension = "default"
-            versionCode = 4
-            versionName = "1.0.0"
+            versionCode = 6
+            versionName = "1.0.1"
             resValue("string", "app_name", "App Info: Inspector")
             resValue("string", "open_ad_id", "ca-app-pub-9650203619472107/6506196074")
             resValue("string", "banner_ad_id", "ca-app-pub-9650203619472107/8891055952")
+            resValue("string", "banner2_ad_id", "ca-app-pub-9650203619472107/4150978550")
         }
     }
     applicationVariants.all {
         outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                val outputFileName = "App Info_Inspector-${versionName}($versionCode)-${buildType.name}.apk"
+                val outputFileName = "App_Info_Inspector-${versionName}($versionCode)-${buildType.name}.apk"
                 output.outputFileName = outputFileName
             }
         outputs.all {
             // AAB file name that You want. Flavour name also can be accessed here.
-            val aabPackageName = "App Info_Inspector-${versionName}($versionCode)-${buildType.name}.aab"
+            val aabPackageName = "App_Info_Inspector-${versionName}($versionCode)-${buildType.name}.aab"
             // Get final bundle task name for this variant
             val bundleFinalizeTaskName = StringBuilder("sign").run {
                 // Add each flavor dimension for this variant here

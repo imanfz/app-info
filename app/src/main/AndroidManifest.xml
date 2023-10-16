@@ -5,6 +5,9 @@
     <!-- For apps targeting Android 13 or higher & GMA SDK version 20.3.0 or lower -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
@@ -21,8 +24,10 @@
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
         android:requestLegacyExternalStorage="true"
+        android:resizeableActivity="true"
+        android:multiArch="true"
         android:hardwareAccelerated="true"
-        android:theme="@style/Theme.App.Starting"
+        android:theme="@style/Theme.AppInfo"
         tools:targetApi="tiramisu">
         <activity
             android:name=".ui.screen.MainActivity"

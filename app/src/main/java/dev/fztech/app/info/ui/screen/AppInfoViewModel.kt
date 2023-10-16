@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -31,6 +32,7 @@ class AppInfoViewModel: ViewModel() {
         get() = _filteredItem
 
     private lateinit var packageManager: PackageManager
+    val loading: MutableState<Boolean> = mutableStateOf(true)
 
     fun getSize(category: Category): Int {
         return _items.value.orEmpty().filter {
@@ -83,16 +85,28 @@ class AppInfoViewModel: ViewModel() {
 
     fun loadPackage(context: Context) {
         viewModelScope.launch {
+            loading.value = items.value?.isEmpty() == true
             packageManager = context.packageManager
             try {
-                val results = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
-                _items.value = results
+                val results = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    packageManager.getInstalledPackages(PackageManager.PackageInfoFlags.of(0L))
+                } else {
+                    packageManager.getInstalledPackages(0)
+                }
+                if (results.size != _items.value?.size) {
+                    _items.value = results.sortedWith(
+                        Comparator { f: PackageInfo, s: PackageInfo ->
+                            return@Comparator f.applicationInfo.loadLabel(packageManager).toString()
+                                .compareTo(s.applicationInfo.loadLabel(packageManager).toString())
+                        })
+                }
                 applyFilter()
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(context, "Failed to load package: ${e.message}", Toast.LENGTH_SHORT)
                     .show()
             }
+            loading.value = false
         }
     }
 }

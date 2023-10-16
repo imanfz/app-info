@@ -5,12 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -28,20 +32,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.compose.ui.unit.dp
 import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.BannerAdView
 import dev.fztech.app.info.ui.component.ExpandableSearchView
 import dev.fztech.app.info.ui.component.ExtraSmallSpacer
+import dev.fztech.app.info.ui.component.ShimmerListItem
+import dev.fztech.app.info.ui.component.decoration.ShimmerBrush
 import dev.fztech.app.info.ui.theme.AppInfoTheme
 import dev.fztech.app.info.ui.theme.Dimens
 import dev.fztech.app.info.utils.Category
-import dev.fztech.app.info.utils.extenstions.loge
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,16 +57,17 @@ fun MainScreen(viewModel: AppInfoViewModel, onNavigateToDetail: (PackageInfo) ->
 
     val context = LocalContext.current
     val list by viewModel.items.observeAsState(emptyList())
+    val loading by viewModel.loading
     val query by viewModel.query.observeAsState(initial = "")
 
     LaunchedEffect(key1 = viewModel) {
         launch {
             viewModel.apply {
                 loadPackage(context)
-                loge("LAUN")
             }
         }
     }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -97,38 +105,60 @@ fun MainScreen(viewModel: AppInfoViewModel, onNavigateToDetail: (PackageInfo) ->
                             .padding(Dimens.XSmall),
                     ) {
                         items(Category.values()) { item ->
-                            FilterChip(
-                                modifier = Modifier.padding(horizontal = Dimens.Small), // gap between items
-                                selected = (item == viewModel.category.value),
-                                onClick = {
-                                    viewModel.changeCategory(item)
-                                },
-                                label = {
-                                    Text(text = item.value)
-                                },
-                                trailingIcon = {
-                                    Text(text = "(${viewModel.getSize(item)})")
-                                },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    labelColor = MaterialTheme.colorScheme.onPrimary,
-                                    iconColor = Color.Yellow.copy(0.7f),
-                                    selectedLabelColor = Color.Yellow,
-                                    selectedContainerColor = MaterialTheme.colorScheme.onPrimary.copy(0.5f),
-                                    selectedTrailingIconColor = MaterialTheme.colorScheme.primary
-                                ),
-                                border = FilterChipDefaults.filterChipBorder(
-                                    borderColor = Color.LightGray
+                            if (loading) {
+                                Spacer(modifier = Modifier.width(Dimens.Small))
+                                Spacer(modifier = Modifier
+                                    .padding(bottom = Dimens.Small)
+                                    .width(70.dp)
+                                    .height(Dimens.XXLarge)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(ShimmerBrush())
                                 )
-                            )
+                                Spacer(modifier = Modifier.width(Dimens.Small))
+                            } else {
+                                FilterChip(
+                                    modifier = Modifier
+                                        .padding(horizontal = Dimens.Small), // gap between items
+                                    selected = (item == viewModel.category.value),
+                                    onClick = {
+                                        viewModel.changeCategory(item)
+                                    },
+                                    label = {
+                                        Text(text = item.value)
+                                    },
+                                    trailingIcon = {
+                                        Text(text = "(${viewModel.getSize(item)})")
+                                    },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        labelColor = MaterialTheme.colorScheme.onPrimary,
+                                        iconColor = Color.Yellow.copy(0.7f),
+                                        selectedLabelColor = Color.Yellow,
+                                        selectedContainerColor = MaterialTheme.colorScheme.onPrimary.copy(0.5f),
+                                        selectedTrailingIconColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    border = FilterChipDefaults.filterChipBorder(
+                                        borderColor = Color.LightGray
+                                    )
+                                )
+                            }
                         }
                     }
                 }
-                ListItem(modifier = Modifier.fillMaxWidth(), list = list) { packageInfo ->
-                    onNavigateToDetail(packageInfo)
+
+                if (loading) {
+                    Column {
+                        repeat(15) {
+                            ShimmerListItem(brush = ShimmerBrush())
+                        }
+                    }
+                } else {
+                    ListItem(modifier = Modifier.fillMaxWidth(), list = list) { packageInfo ->
+                        onNavigateToDetail(packageInfo)
+                    }
                 }
             }
 
-            BannerAdView(Modifier.align(Alignment.BottomCenter))
+            BannerAdView(Modifier.align(Alignment.BottomCenter), adID = stringResource(id = R.string.banner_ad_id))
         }
     }
 }

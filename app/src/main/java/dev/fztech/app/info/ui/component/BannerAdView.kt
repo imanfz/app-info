@@ -24,12 +24,11 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
-import dev.fztech.app.info.R
 import dev.fztech.app.info.utils.extenstions.rememberLifecycleEvent
 import dev.fztech.app.info.utils.isSmallScreen
 
 @Composable
-fun BannerAdView(modifier: Modifier = Modifier) {
+fun BannerAdView(modifier: Modifier = Modifier, adID: String) {
     val lifeCycleState = rememberLifecycleEvent()
     val tag = "BannerAdView"
     val isSmallDevice = isSmallScreen()
@@ -96,7 +95,7 @@ fun BannerAdView(modifier: Modifier = Modifier) {
                 }, update = {
                     Log.d(tag, "onUpdate")
                     it.apply {
-                        adUnitId = context.getString(R.string.banner_ad_id)
+                        adUnitId = adID
                         doOnLayout {
                             // calling load ad to load our ad.
                             loadAd(AdRequest.Builder().build())
@@ -111,5 +110,5 @@ fun BannerAdView(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun Preview() {
-    BannerAdView()
+    BannerAdView(adID = "")
 }

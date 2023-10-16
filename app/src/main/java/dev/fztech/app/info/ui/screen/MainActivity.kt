@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
                             MainScreen(viewModel) {
                                 navController.navigate(
                                     Routes.Detail.route,
-                                    bundleOf( INFO_KEY to it)
+                                    bundleOf(INFO_KEY to it)
                                 )
                             }
                         }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
@@ -43,13 +44,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
+import dev.fztech.app.info.R
 import dev.fztech.app.info.ui.component.BannerAdView
 import dev.fztech.app.info.ui.component.DefaultSpacer
 import dev.fztech.app.info.ui.component.PermissionDialog
@@ -207,7 +211,8 @@ fun DetailScreen(data: PackageInfo, onBackPressed: () -> Unit) {
                         model = applicationInfo.loadIcon(pm),
                         contentDescription = "icon",
                         modifier = Modifier
-                            .align(Alignment.CenterHorizontally),
+                            .align(Alignment.CenterHorizontally)
+                            .size(100.dp),
                         contentScale = ContentScale.FillBounds
                     )
 //                    Text(text = "${}")
@@ -245,7 +250,7 @@ fun DetailScreen(data: PackageInfo, onBackPressed: () -> Unit) {
                     )
                 }
             }
-            BannerAdView(Modifier.align(Alignment.BottomCenter))
+            BannerAdView(Modifier.align(Alignment.BottomCenter), adID = stringResource(id = R.string.banner2_ad_id))
         }
 
         if (showDialogPermission.value) {
